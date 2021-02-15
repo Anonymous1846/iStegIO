@@ -41,8 +41,9 @@ def binary_to_string(binary):
 	# we first convert the binary to hex and then into string !
 	#each hex bit is translated into int base 2 and then to string
 	#we get the byte stream of the message !
-	return binascii.unhexlify('%x' % (int('0b'+binary,2)))
-'''
+	message= binascii.unhexlify('%x' % (int('0b'+binary,2)))
+	return message
+'''	
 If end of the hex code is ether 0 or 1, then return the last part of the hexcode
 params: hexcode
 return: last hex
@@ -77,7 +78,7 @@ def hide(filename,message,out):
 				new_data=encrypt(rgb_to_hex(i[0],i[1],i[2]),binary[digit])
 				#if it lies there we get a non None value!
 				if new_data is None:
-					enc_data.append(new_data)
+					enc_data.append(i)
 				else:
 					r,g,b=hex_to_rgb(new_data)
 					#using the rgba format !
@@ -102,9 +103,9 @@ def extract(filename):
 			if digit is None:
 				pass
 			else:
-				binary+=digit
+				binary=binary+digit
 				#checking for the delimiter !
-				if binary[-16:] =='1111111111111110':
+				if (binary[-16:] =='1111111111111110'):
 					print('We got it !')
 					#now just have to convert the binary to string upto the delimiter !
 					return binary_to_string(binary[:-16])
@@ -122,7 +123,7 @@ if __name__=='__main__':
 	while True:
 		choice = int(input('1)Encrypt\n2)Decrypt\n3)Exit'))
 		if choice == 1:
-			image = f.askopenfile()
+			image = f.askopenfilename()
 			mess=input('Enter the message !')
 			out=input('Output File name')
 			hide(image,mess,out)
