@@ -21,18 +21,28 @@ return: rgb tuple
 def hex_to_rgb(hexcode):
 	#using the getcolor method we got the rgb tuple !
 	return ImageColor.getcolor(hexcode,"RGB")
+'''
+We first convert the string message into hexadecimal and then into binary 
+params: string message
+return: binary representation of the message
+'''
 def string_to_binary(string):
 	#the output will be 0b01100100010010
 	#we have to translate the binary to 01100100010010 
 	binary=bin(int(binascii.hexlify(string.encode()),16)).replace('0b','')
 	return binary
+'''
+The below funcition will convert the binary format into corresponding byte strem message 
+params: binary
+return : byte stream message !
+'''
 def binary_to_string(binary):
 	# we first convert the binary to hex and then into string !
 	#each hex bit is translated into int base 2 and then to string
 	#we get the byte stream of the message !
 	return binascii.unhexlify('%x' % int('0b'+binary,2))
 
-print(hex_to_rgb('#0e0f99'))
-print(rgb_to_hex(12,15,12))
-print(string_to_binary('Hello'))
-print(binary_to_string(string_to_binary('Hello')))
+def hide(filename,message):
+	pass
+def extract(filename):
+	pass
