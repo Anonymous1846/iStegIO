@@ -127,8 +127,9 @@ if __name__=='__main__':
 			out=input('Output File name')
 			hide(image,mess,out)
 		elif choice == 2:
-			image =f.askopenfilename()
-			extract(image)
+#			image =f.askopenfilename()
+#			extract(image)
+			print(binary_to_string('10101010101010'))
 		elif choice == 3:
 			print('Exiting.........')
 			break
