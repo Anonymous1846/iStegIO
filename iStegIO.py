@@ -3,7 +3,8 @@ iStegIO is a simple python script/ application which is used to hide text messag
 It usees LSB Steganography technique to hide the text within the images. Least Significant Bit Steganography method, replaces
 the blue bits, with the text bits.
 '''
-
+from tkinter import filedialog as f
+from pyfiglet import figlet_format
 import binascii
 from PIL import Image,ImageColor
 '''
@@ -40,7 +41,7 @@ def binary_to_string(binary):
 	# we first convert the binary to hex and then into string !
 	#each hex bit is translated into int base 2 and then to string
 	#we get the byte stream of the message !
-	return binascii.unhexlify('%x' % int('0b'+binary,2))
+	return binascii.unhexlify('%x' % (int('0b'+binary,2)))
 '''
 If end of the hex code is ether 0 or 1, then return the last part of the hexcode
 params: hexcode
@@ -89,4 +90,46 @@ def hide(filename,message,out):
 		print('Completed !')
 	return "Invalid Format !!"
 def extract(filename):
-	image 
+	image =Image.open(filename)
+	#the binary data, which is to be store, is initlized as null string 
+	binary=''
+	if image.mode in ('RGBA'):
+		image=image.convert('RGBA')
+		img_data=image.getdata()
+		for i in img_data:
+			#here we obtain the digit from which it is added to this image !
+			digit = decrypt(rgb_to_hex(i[0],i[1],i[2]))
+			if digit is None:
+				pass
+			else:
+				binary+=digit
+				#checking for the delimiter !
+				if binary[-16:] =='1111111111111110':
+					print('We got it !')
+					#now just have to convert the binary to string upto the delimiter !
+					return binary_to_string(binary[:-16])
+		#else do normal conversion !
+		return binary_to_string(binary)
+	return "Invalid Image Mode !"
+
+#-----------------------------End of the Implementation --------------------------------#
+
+if __name__=='__main__':
+	heading = figlet_format('i S t e g I O')
+	print(heading)
+	print('VERSION 1.0')
+	print(*65*('-'))
+	while True:
+		choice = int(input('1)Encrypt\n2)Decrypt\n3)Exit'))
+		if choice == 1:
+			image = f.askopenfile()
+			mess=input('Enter the message !')
+			out=input('Output File name')
+			hide(image,mess,out)
+		elif choice == 2:
+			image =f.askopenfilename()
+			extract(image)
+		elif choice == 3:
+			print('Exiting.........')
+			break
+		else:print('Invalid !')
