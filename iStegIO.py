@@ -118,24 +118,35 @@ if __name__=='__main__':
 	print('VERSION 1.0')
 	print(*65*('-'))
 	password_flag='$PASSWORD$->'#the password is set to null by default and the we can set it to our choice !(The weird string is the flag !)
-	password=''
+	
 	while True:
-		choice = int(input('1)Encrypt\n2)Decrypt\n3)Exit'))
-		if choice == 1:
-			image = f.askopenfilename()
-			message=input('Enter the message !')
-                        password =input('Enter the password : ')
-                        message+=password_flag+password
-			output=input('Output File name')
-			hide(image,message,output)
-		elif choice == 2:
-			image =f.askopenfilename()
-                        password=input('Enter the password : ')
-                        data=extract(image)
-                        image_password=data[:data.rindex(password_flag)]
-			print(image_password)
-
-		elif choice == 3:
-			print('Exiting.........')
+		choice=int(input('1)Encode Message\n2)Decode Message\n3)Exit\n>>'))
+		if choice==1:
+			try:
+				image =f.askopenfilename()
+				message=input('Enter the message or type !txt for choosing a text file :')
+				if message =='!txt':
+					text_file=f.askopenfilename(title = "Select text file",filetypes = (("text files","*.txt"),("all files","*.*")))
+					with open(message,'r') as tf:
+						message=tf.read()
+				#name of the stego file object !
+				output_file_name=input('Enter the output file name : ')
+				hide(image,message,output_file_name)
+			except Exception as e:
+				print(f'{e} Invalid file chosen or no file chosen !\nPlease try again !')
+		elif choice==2:
+			try:
+				image =f.askopenfilename()
+				decoded_data=extract(image)
+				output_file_name=f.asksaveasfilename(filetypes=[('All Files', '*.*'), 
+             	('Text Document', '*.txt')] )
+				with open(output_file_name,'w') as tf:
+					tf.write(decoded_data)
+				print(f'Decoded data saved to {output_file_name} !')
+			except Exception as e:
+				print(f'{e} Please try again !')
+		elif choice==3:
+			print('Exiting........!')
 			break
-		else:print('Invalid !')
+		else:
+			print('Invalid choice !')
