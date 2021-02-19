@@ -1,0 +1,2 @@
+PILLOW==8.1.0
+pyfiglet==0.7
