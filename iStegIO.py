@@ -7,6 +7,7 @@ from tkinter import filedialog as f
 from pyfiglet import figlet_format
 import binascii
 from PIL import Image,ImageColor
+from getpass import getpass
 '''
 The below function will take three int arguements and gives hex code for the corresponding color !
 params:r,g,b color code (int)
@@ -57,6 +58,8 @@ def encrypt(hexcode,digit):
 	else:return None
 '''
 We'll use all the helper function above to hide the message string within the photo
+params: the filename(namely the png photo in which we want to hide the data), message usually a text file or custom message, outputfile file(.png)
+return: the encoded png file 
 '''
 def hide(filename,message,out):
 	image =Image.open(filename)
@@ -87,6 +90,13 @@ def hide(filename,message,out):
 		image.save(out+".png","PNG")
 		print('Completed !')
 	return "Invalid Format !!"
+
+'''
+The below function will decode the message from the png stego object !
+It does this by searching for the delimiter 1111111111111110
+params:filename(stego object !)
+return:the message file .txt
+'''
 def extract(filename):
 	image =Image.open(filename)
 	#the binary data, which is to be store, is initlized as null string 
@@ -110,6 +120,14 @@ def extract(filename):
 		return binary_to_string(binary)
 	return "Invalid Image Mode !"
 
+def write_to_file(data,output_file_name):
+	output_file_name=f.asksaveasfilename(title='Save your secret message to ',filetypes=[('All Files', '*.*'), 
+             			('Text Document', '*.txt')] )
+	with open(output_file_name+'.txt','w') as tf:
+		tf.write(data)
+		print(f'Decoded data saved to {output_file_name} !')
+		
+
 #-----------------------------End of the Implementation --------------------------------#
 
 if __name__=='__main__':
@@ -125,6 +143,8 @@ if __name__=='__main__':
 			try:
 				image =f.askopenfilename()
 				message=input('Enter the message or type !txt for choosing a text file :')
+				my_pass=getpass('Enter a password otherwise skip this part (Press Space) :')#the password prepended to flag !
+				message=my_pass+password_flag+message#prepending the password, password flag and the actual message !
 				if message =='!txt':
 					text_file=f.askopenfilename(title = "Select text file",filetypes = (("text files","*.txt"),("all files","*.*")))
 					with open(message,'r') as tf:
@@ -137,12 +157,19 @@ if __name__=='__main__':
 		elif choice==2:
 			try:
 				image =f.askopenfilename()
-				decoded_data=extract(image)
-				output_file_name=f.asksaveasfilename(filetypes=[('All Files', '*.*'), 
-             	('Text Document', '*.txt')] )
-				with open(output_file_name,'w') as tf:
-					tf.write(decoded_data)
-				print(f'Decoded data saved to {output_file_name} !')
+				decoded_data=extract(image)				
+				password=decoded_data[:decoded_data.index('$')]#obtaining the password if it exists from the image !
+				data=decoded_data[decoded_data.index('->')+2:]#the actual data !
+				if password!='': 
+					my_pass=getpass('It is a password protected file, Enter the password :')
+					if my_pass==password:#if there's a password !
+						write_to_file(data,output_file_name)
+					else:
+						print('Wrong Password !')
+				else:
+					write_to_file(data,output_file_name)#if there's no password !
+
+
 			except Exception as e:
 				print(f'{e} Please try again !')
 		elif choice==3:
