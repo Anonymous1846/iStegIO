@@ -64,7 +64,7 @@ return: the encoded png file
 def hide(filename,message,out):
 	image =Image.open(filename)
 	
-	binary=string_to_binary(message)+'1111111111111110'#convert the message to binary and append 15 ones and one zero !
+	binary=string_to_binary(message)+'1111111111111110'#convert the message to binary and append 15 ones and one zero (delimiter)!
 	if image.mode in ('RGBA'):
 		image =image.convert('RGBA')
 		
@@ -120,9 +120,11 @@ def extract(filename):
 		return binary_to_string(binary)
 	return "Invalid Image Mode !"
 
-def write_to_file(data,output_file_name):
+def write_to_file(data):
 	output_file_name=f.asksaveasfilename(title='Save your secret message to ',filetypes=[('All Files', '*.*'), 
              			('Text Document', '*.txt')] )
+	if '.txt' in output_file_name:
+		output_file_name=output_file_name.replace('.txt','')#replace the .txt from the text file if it already exists !
 	with open(output_file_name+'.txt','w') as tf:
 		tf.write(data)
 		print(f'Decoded data saved to {output_file_name} !')
@@ -134,7 +136,7 @@ if __name__=='__main__':
 	heading = figlet_format('i S t e g I O')
 	print(heading)
 	print('VERSION 1.0')
-	print(*65*('-'))
+	print(*70*('-'))
 	password_flag='$PASSWORD$->'#the password is set to null by default and the we can set it to our choice !(The weird string is the flag !)
 	
 	while True:
@@ -142,15 +144,15 @@ if __name__=='__main__':
 		if choice==1:
 			try:
 				image =f.askopenfilename()
-				message=input('Enter the message or type !txt for choosing a text file :')
-				my_pass=getpass('Enter a password otherwise skip this part (Press Space) :')#the password prepended to flag !
-				message=my_pass+password_flag+message#prepending the password, password flag and the actual message !
+				message=input('Enter the message or type !txt for choosing a text file :')				
 				if message =='!txt':
-					text_file=f.askopenfilename(title = "Select text file",filetypes = (("text files","*.txt"),("all files","*.*")))
-					with open(message,'r') as tf:
+					text_file=f.askopenfilename(title = "Select text file",filetypes = (("text files","*.txt"),("all files","*.*")))#filter for text files !
+					with open(text_file,'r') as tf:#using the context manager to open the file in read mode !
 						message=tf.read()
-				#name of the stego file object !
-				output_file_name=input('Enter the output file name : ')
+				my_pass=getpass('Enter a password otherwise skip this part (Press Space) :')#the password prepended to flag !
+				
+				message=my_pass+password_flag+message#prepending the password, password flag and the actual message !
+				output_file_name=input('Enter the output file name : ')#name of the stego file object !
 				hide(image,message,output_file_name)
 			except Exception as e:
 				print(f'{e} Invalid file chosen or no file chosen !\nPlease try again !')
@@ -163,11 +165,11 @@ if __name__=='__main__':
 				if password!='': 
 					my_pass=getpass('It is a password protected file, Enter the password :')
 					if my_pass==password:#if there's a password !
-						write_to_file(data,output_file_name)
+						write_to_file(data)
 					else:
 						print('Wrong Password !')
 				else:
-					write_to_file(data,output_file_name)#if there's no password !
+					write_to_file(data)#if there's no password !
 
 
 			except Exception as e:
