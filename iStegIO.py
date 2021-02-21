@@ -9,17 +9,30 @@ from pyfiglet import figlet_format
 import binascii
 from PIL import Image,ImageColor
 from getpass import getpass
-
+'''
+The below function will create a random key each time
+return: decoded key
+params:None
+'''
 def generate_key():
 	return Fernet.generate_key().decode()#generate a random key each time !
+
+'''
+The below function will encrypt the plain text into a cipher text !
+return:cipher text 
+param:message(plain text),key obtained from the image'''
 def encrypt_message(message,key):
 	fernet_lock=Fernet(key)
 	cipher_text=fernet_lock.encrypt(message.encode())
 	return cipher_text.decode()
+'''
+The below function will decrypt the cipher text into a plain text !
+return:plain text
+param:cipher text ,key obtained from the image'''
 def decrypt_message(cipher_text,key):
 	fernet_lock=Fernet(key)
 	plain_text=fernet_lock.decrypt(cipher_text.encode())
-	return plain_text.decode()
+	return plain_text.decode()#we have to decode it otherwise it will be in bytes !
 
 '''
 The below function will take three int arguements and gives hex code for the corresponding color !
@@ -155,56 +168,62 @@ if __name__=='__main__':
 	while True:
 		choice=int(input('1)Encode Message\n2)Decode Message\n3)Exit\n>>'))
 		if choice==1:
+
 			try:
 				image =f.askopenfilename()
-				message=input('Enter the message or type !txt for choosing a text file :')	
+				message=input('Enter the message or type !txt for choosing a text file :')#use the !txt flag for opening the text file other wise we type in the message !
 				key=generate_key()#generating a key !
+
 				if message =='!txt':
 					text_file=f.askopenfilename(title = "Select text file",filetypes = (("text files","*.txt"),("all files","*.*")))#filter for text files !
+
 					with open(text_file,'r') as tf:#using the context manager to open the file in read mode !
 						message=tf.read()
 				my_pass=getpass('Enter a password otherwise skip this part (Press Space) :')#the password prepended to flag !
 				
 				message=my_pass+password_flag+message#prepending the password, password flag and the actual message, and the key an key flag token!
 				message=encrypt_message(message,key)#encrypting the message before the adding to the image !
-				message=key+key_flag+message
+				message=key+key_flag+message#prepends the key and key flag at the beginning !
 				print(message)
+
 				output_file_name=input('Enter the output file name : ')#name of the stego file object !
 				hide(image,message,output_file_name)
 			except Exception as e:
 				print(f'{e} Invalid file chosen or no file chosen !\nPlease try again !')
 		elif choice==2:
 			try:
-				image =f.askopenfilename()
+				image =f.askopenfilename()#opens the file image
 				decoded_data=extract(image)				
 				
-				key=decoded_data[:decoded_data.index('$KEY$')]
-				acutal_data=decoded_data[decoded_data.index('$KEY$')+5:]
-				acutal_data=decrypt_message(acutal_data,key)
+				key=decoded_data[:decoded_data.index('$KEY$')]#extracts the key from the cipher text !
+				acutal_data=decoded_data[decoded_data.index('$KEY$')+5:]#extracts the info except for the key and key flag
+
+				acutal_data=decrypt_message(acutal_data,key)#decrypts the data
 				password=acutal_data[:acutal_data.index('$')]#obtaining the password if it exists from the image !
 				text_message=acutal_data[acutal_data.index('->')+2:]#the actual data !
+
+
 				if password!='': 
+
 					my_pass=getpass('It is a password protected file, Enter the password :')
+
 					if my_pass==password:#if there's a password !
 						write_to_file(text_message)
+
 					else:
 						print('Wrong Password !')
+
 				else:
 					write_to_file(text_message)#if there's no password !
 
 
 			except Exception as e:
 				print(f'{e} Please try again !')
-		elif choice==3:
-			# text='key$KEY$password$PASSWORD$->Messgae'
-			# print(text[text.index('$KEY$')+5:])
-			
-			
-			text=encrypt_message(message[message.index('$KEY$')+5:],key)
-			print(text)
-			print(decrypt_message(text,message[:message.index('$KEY$')]))
-			
+
+
+		elif choice==3:			
 			print('Exiting........!')
 			break
+
 		else:
 			print('Invalid choice !')
