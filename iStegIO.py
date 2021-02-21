@@ -3,11 +3,24 @@ iStegIO is a simple python script/ application which is used to hide text messag
 It usees LSB Steganography technique to hide the text within the images. Least Significant Bit Steganography method, replaces
 the blue bits, with the text bits.
 '''
+from cryptography.fernet import Fernet
 from tkinter import filedialog as f
 from pyfiglet import figlet_format
 import binascii
 from PIL import Image,ImageColor
 from getpass import getpass
+
+def generate_key():
+	return Fernet.generate_key().decode()#generate a random key each time !
+def encrypt_message(message,key):
+	fernet_lock=Fernet(key)
+	cipher_text=fernet_lock.encrypt(message.encode())
+	return cipher_text.decode()
+def decrypt_message(cipher_text,key):
+	fernet_lock=Fernet(key)
+	plain_text=fernet_lock.decrypt(cipher_text.encode())
+	return plain_text.decode()
+
 '''
 The below function will take three int arguements and gives hex code for the corresponding color !
 params:r,g,b color code (int)
@@ -138,20 +151,24 @@ if __name__=='__main__':
 	print('VERSION 1.0')
 	print(*70*('-'))
 	password_flag='$PASSWORD$->'#the password is set to null by default and the we can set it to our choice !(The weird string is the flag !)
-	
+	key_flag='$KEY$'#key flag for identifying the key in the cipher text !
 	while True:
 		choice=int(input('1)Encode Message\n2)Decode Message\n3)Exit\n>>'))
 		if choice==1:
 			try:
 				image =f.askopenfilename()
-				message=input('Enter the message or type !txt for choosing a text file :')				
+				message=input('Enter the message or type !txt for choosing a text file :')	
+				key=generate_key()#generating a key !
 				if message =='!txt':
 					text_file=f.askopenfilename(title = "Select text file",filetypes = (("text files","*.txt"),("all files","*.*")))#filter for text files !
 					with open(text_file,'r') as tf:#using the context manager to open the file in read mode !
 						message=tf.read()
 				my_pass=getpass('Enter a password otherwise skip this part (Press Space) :')#the password prepended to flag !
 				
-				message=my_pass+password_flag+message#prepending the password, password flag and the actual message !
+				message=my_pass+password_flag+message#prepending the password, password flag and the actual message, and the key an key flag token!
+				message=encrypt_message(message,key)#encrypting the message before the adding to the image !
+				message=key+key_flag+message
+				print(message)
 				output_file_name=input('Enter the output file name : ')#name of the stego file object !
 				hide(image,message,output_file_name)
 			except Exception as e:
@@ -160,21 +177,33 @@ if __name__=='__main__':
 			try:
 				image =f.askopenfilename()
 				decoded_data=extract(image)				
-				password=decoded_data[:decoded_data.index('$')]#obtaining the password if it exists from the image !
-				data=decoded_data[decoded_data.index('->')+2:]#the actual data !
+				
+				key=decoded_data[:decoded_data.index('$KEY$')]
+				acutal_data=decoded_data[decoded_data.index('$KEY$')+5:]
+				acutal_data=decrypt_message(acutal_data,key)
+				password=acutal_data[:acutal_data.index('$')]#obtaining the password if it exists from the image !
+				text_message=acutal_data[acutal_data.index('->')+2:]#the actual data !
 				if password!='': 
 					my_pass=getpass('It is a password protected file, Enter the password :')
 					if my_pass==password:#if there's a password !
-						write_to_file(data)
+						write_to_file(text_message)
 					else:
 						print('Wrong Password !')
 				else:
-					write_to_file(data)#if there's no password !
+					write_to_file(text_message)#if there's no password !
 
 
 			except Exception as e:
 				print(f'{e} Please try again !')
 		elif choice==3:
+			# text='key$KEY$password$PASSWORD$->Messgae'
+			# print(text[text.index('$KEY$')+5:])
+			
+			
+			text=encrypt_message(message[message.index('$KEY$')+5:],key)
+			print(text)
+			print(decrypt_message(text,message[:message.index('$KEY$')]))
+			
 			print('Exiting........!')
 			break
 		else:
