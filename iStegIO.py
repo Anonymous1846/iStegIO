@@ -184,10 +184,10 @@ if __name__=='__main__':
 				message=my_pass+password_flag+message#prepending the password, password flag and the actual message, and the key an key flag token!
 				message=encrypt_message(message,key)#encrypting the message before the adding to the image !
 				message=key+key_flag+message#prepends the key and key flag at the beginning !
-				print(message)
+				
 
 				output_file_name=input('Enter the output file name : ')#name of the stego file object !
-				hide(image,message,output_file_name)
+				hide(image,message,output_file_name)#the messge added to the image png 
 			except Exception as e:
 				print(f'{e} Invalid file chosen or no file chosen !\nPlease try again !')
 		elif choice==2:
