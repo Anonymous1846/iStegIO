@@ -21,6 +21,7 @@ def generate_key():
 The below function will encrypt the plain text into a cipher text !
 return:cipher text 
 param:message(plain text),key obtained from the image'''
+
 def encrypt_message(message,key):
 	fernet_lock=Fernet(key)
 	cipher_text=fernet_lock.encrypt(message.encode())
@@ -29,6 +30,7 @@ def encrypt_message(message,key):
 The below function will decrypt the cipher text into a plain text !
 return:plain text
 param:cipher text ,key obtained from the image'''
+
 def decrypt_message(cipher_text,key):
 	fernet_lock=Fernet(key)
 	plain_text=fernet_lock.decrypt(cipher_text.encode())
@@ -77,6 +79,11 @@ def decrypt(hexcode):
 	if hexcode[-1] in ['0','1']:
 		return hexcode[-1]
 	else:return None
+'''
+if the hex value of the color falls within the range of 0-5, then we add the digit(binary !)
+params: hexcode and the digit !
+return:None if it is out of the range 0-5 otherwise hexcode with appended digits !
+'''
 def encrypt(hexcode,digit):
 	if hexcode[-1] in ('0','1','2','3','4','5'):
 		hexcode=hexcode[:-1]+digit
@@ -128,13 +135,17 @@ def extract(filename):
 	#the binary data, which is to be store, is initlized as null string 
 	binary=''
 	if image.mode in ('RGBA'):
+
 		image=image.convert('RGBA')
 		img_data=image.getdata()
+
 		for i in img_data:
 			#here we obtain the digit from which it is added to this image !
 			digit = decrypt(rgb_to_hex(i[0],i[1],i[2]))
+
 			if digit is None:
 				pass
+
 			else:
 				binary=binary+digit
 				#checking for the delimiter !
@@ -144,6 +155,7 @@ def extract(filename):
 					return binary_to_string(binary[:-16])
 		#else do normal conversion !
 		return binary_to_string(binary)
+
 	return "Invalid Image Mode !"
 
 def write_to_file(data):
@@ -159,13 +171,16 @@ def write_to_file(data):
 #-----------------------------End of the Implementation --------------------------------#
 
 if __name__=='__main__':
+
 	heading = figlet_format('i S t e g I O')
 	print(heading)
 	print('VERSION 1.0')
 	print(*70*('-'))
 	password_flag='$PASSWORD$->'#the password is set to null by default and the we can set it to our choice !(The weird string is the flag !)
 	key_flag='$KEY$'#key flag for identifying the key in the cipher text !
+	
 	while True:
+
 		choice=int(input('1)Encode Message\n2)Decode Message\n3)Exit\n>>'))
 		if choice==1:
 
@@ -175,10 +190,13 @@ if __name__=='__main__':
 				key=generate_key()#generating a key !
 
 				if message =='!txt':
+
 					text_file=f.askopenfilename(title = "Select text file",filetypes = (("text files","*.txt"),("all files","*.*")))#filter for text files !
 
 					with open(text_file,'r') as tf:#using the context manager to open the file in read mode !
+
 						message=tf.read()
+
 				my_pass=getpass('Enter a password otherwise skip this part (Press Space) :')#the password prepended to flag !
 				
 				message=my_pass+password_flag+message#prepending the password, password flag and the actual message, and the key an key flag token!
@@ -208,6 +226,7 @@ if __name__=='__main__':
 					my_pass=getpass('It is a password protected file, Enter the password :')
 
 					if my_pass==password:#if there's a password !
+						print('Good, now choose a file to save to !')
 						write_to_file(text_message)
 
 					else:
