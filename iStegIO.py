@@ -197,7 +197,7 @@ if __name__=='__main__':
 
 						message=tf.read()
 
-				my_pass=getpass('Enter a password otherwise skip this part (Press Space) :')#the password prepended to flag !
+				my_pass=getpass('Enter a password otherwise skip this part (Press Enter ) :')#the password prepended to flag !
 				
 				message=my_pass+password_flag+message#prepending the password, password flag and the actual message, and the key an key flag token!
 				message=encrypt_message(message,key)#encrypting the message before the adding to the image !
