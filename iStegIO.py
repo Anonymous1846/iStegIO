@@ -3,40 +3,52 @@ iStegIO is a simple python script/ application which is used to hide text messag
 It usees LSB Steganography technique to hide the text within the images. Least Significant Bit Steganography method, replaces
 the blue bits, with the text bits.
 '''
-from cryptography.fernet import Fernet
-from tkinter import filedialog as f
+from tkinter import filedialog as f,Tk  
+from Crypto.Cipher import AES
 from pyfiglet import figlet_format
 import binascii
 from PIL import Image,ImageColor
 from getpass import getpass
-'''
-The below function will create a random key each time
-return: decoded key
-params:None
-'''
-def generate_key():
-	return Fernet.generate_key().decode()#generate a random key each time !
+from secrets import token_hex
+import hashlib
+class Encryption:
+	def __init__(self):
+		self.mode=AES.MODE_CBC #cipher block chain is one of the primary block cipher modes !
+	'''
+	The below function will create a random key each time
+	return: decoded key 16 bytes
+	params:None
+	'''
+	def generate_key(self):
+		return token_hex(16)#generate a random key each time !
 
-'''
-The below function will encrypt the plain text into a cipher text !
-return:cipher text 
-param:message(plain text),key obtained from the image'''
+	'''
+	The below function will apply padding for the message as long it is not a multiple of 16
+	return: padded message which is divisible by 16(len)
+	params:message
+	'''
+	def padding(self,data):
+		while len(data) % 16!=0:
+			data=data+" "
+		return data
+	'''
+	The below function will encrypt the plain text into a cipher text !
+	return:cipher text 
+	param:message(plain text),key obtained from the image'''
 
-def encrypt_message(message,key):
-	fernet_lock=Fernet(key)
-	cipher_text=fernet_lock.encrypt(message.encode())
-	return cipher_text.decode()
-'''
-The below function will decrypt the cipher text into a plain text !
-return:plain text
-param:cipher text ,key obtained from the image'''
+	def encrypt_message(self,message,key,iv):
+		cipher=AES.new(key.encode(),self.mode,'abcdefqwertyuiop'.encode())
+		cipher_text=cipher.encrypt(message)
+		return cipher_text.decode()
+	'''
+	The below function will decrypt the cipher text into a plain text !
+	return:plain text
+	param:cipher text ,key obtained from the image'''
 
-def decrypt_message(cipher_text,key):
-	fernet_lock=Fernet(key)
-	plain_text=fernet_lock.decrypt(cipher_text.encode())
-	return plain_text.decode()#we have to decode it otherwise it will be in bytes !
+	def decrypt_message(self,cipher_text,key):
+		pass
 
-'''
+	'''
 The below function will take three int arguements and gives hex code for the corresponding color !
 params:r,g,b color code (int)
 return: hex code for color
@@ -176,70 +188,21 @@ if __name__=='__main__':
 	print(heading)
 	print('VERSION 1.0')
 	print(*70*('-'))
-	password_flag='$PASSWORD$->'#the password is set to null by default and the we can set it to our choice !(The weird string is the flag !)
-	key_flag='$KEY$'#key flag for identifying the key in the cipher text !
+	encrypt=Encryption()
 	
 	while True:
 
 		choice=int(input('1)Encode Message\n2)Decode Message\n3)Exit\n>>'))
 		if choice==1:
-
-			try:
-				image =f.askopenfilename()
-				message=input('Enter the message or type !txt for choosing a text file :')#use the !txt flag for opening the text file other wise we type in the message !
-				key=generate_key()#generating a key !
-
-				if message =='!txt':
-
-					text_file=f.askopenfilename(title = "Select text file",filetypes = (("text files","*.txt"),("all files","*.*")))#filter for text files !
-
-					with open(text_file,'r') as tf:#using the context manager to open the file in read mode !
-
-						message=tf.read()
-
-				my_pass=getpass('Enter a password otherwise skip this part (Press Enter ) :')#the password prepended to flag !
-				
-				message=my_pass+password_flag+message#prepending the password, password flag and the actual message, and the key an key flag token!
-				message=encrypt_message(message,key)#encrypting the message before the adding to the image !
-				message=key+key_flag+message#prepends the key and key flag at the beginning !
-				
-
-				output_file_name=input('Enter the output file name : ')#name of the stego file object !
-				hide(image,message,output_file_name)#the messge added to the image png 
-			except Exception as e:
-				print(f'{e} Invalid file chosen or no file chosen !\nPlease try again !')
+			root=Tk()
+			root.withdraw()
+			image=f.askopenfilename()
+			message=input('Enter the message or type !txt for choosing a text file :')#use the !txt flag for opening the text file other wise we type in the message !
+			key=encrypt.generate_key()
+			print(key)
+			print(encrypt.encrypt_message('Hello',key,'qwertyuiopasdfgh'))	
 		elif choice==2:
-			try:
-				image =f.askopenfilename()#opens the file image
-				decoded_data=extract(image)				
-				
-				key=decoded_data[:decoded_data.index('$KEY$')]#extracts the key from the cipher text !
-				acutal_data=decoded_data[decoded_data.index('$KEY$')+5:]#extracts the info except for the key and key flag
-
-				acutal_data=decrypt_message(acutal_data,key)#decrypts the data
-				password=acutal_data[:acutal_data.index('$')]#obtaining the password if it exists from the image !
-				text_message=acutal_data[acutal_data.index('->')+2:]#the actual data !
-
-
-				if password!='': 
-
-					my_pass=getpass('It is a password protected file, Enter the password :')
-
-					if my_pass==password:#if there's a password !
-						print('Good, now choose a file to save to !')
-						write_to_file(text_message)
-
-					else:
-						print('Wrong Password !')
-
-				else:
-					write_to_file(text_message)#if there's no password !
-
-
-			except Exception as e:
-				print(f'{e} Please try again !')
-
-
+			pass
 		elif choice==3:			
 			print('Exiting........!')
 			break
