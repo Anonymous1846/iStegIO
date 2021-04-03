@@ -5,23 +5,20 @@ the blue bits, with the text bits.
 '''
 from tkinter import filedialog as f,Tk  
 from Crypto.Cipher import AES
+from Crypto.Hash import SHA256
 from pyfiglet import figlet_format
 import binascii
 from PIL import Image,ImageColor
 from getpass import getpass
-from secrets import token_hex
+from secrets import token_hex,choice
 import hashlib
+import string
+
 class Encryption:
 	def __init__(self):
 		self.mode=AES.MODE_CBC #cipher block chain is one of the primary block cipher modes !
-	'''
-	The below function will create a random key each time
-	return: decoded key 16 bytes
-	params:None
-	'''
-	def generate_key(self):
-		return token_hex(16)#generate a random key each time !
-
+		self.alphabets=string.ascii_letters+string.digits
+		self.iv=''.join(str(choice(self.alphabets)) for x in range(AES.block_size)).encode()
 	'''
 	The below function will apply padding for the message as long it is not a multiple of 16
 	return: padded message which is divisible by 16(len)
@@ -29,7 +26,7 @@ class Encryption:
 	'''
 	def padding(self,data):
 		while len(data) % 16!=0:
-			data=data+" "
+			data=data+"~"
 		return data
 	'''
 	The below function will encrypt the plain text into a cipher text !
@@ -37,16 +34,23 @@ class Encryption:
 	param:message(plain text),key obtained from the image'''
 
 	def encrypt_message(self,message,key,iv):
-		cipher=AES.new(key.encode(),self.mode,'abcdefqwertyuiop'.encode())
-		cipher_text=cipher.encrypt(message)
-		return cipher_text.decode()
+		key=SHA256.new(key.encode()).digest()
+		
+		cipher=AES.new(key,self.mode,self.iv)
+		padded_message=self.padding(message)
+		cipher_text=cipher.encrypt(padded_message.encode('unicode_escape'))
+		return self.iv.decode()+cipher_text.decode('unicode_escape')
 	'''
 	The below function will decrypt the cipher text into a plain text !
 	return:plain text
 	param:cipher text ,key obtained from the image'''
 
 	def decrypt_message(self,cipher_text,key):
-		pass
+		key=SHA256.new(key.encode()).digest()
+		iv=cipher_text[:AES.block_size].encode()
+		cipher=AES.new(key,self.mode,iv)
+		plain_text=cipher.decrypt(cipher_text[AES.block_size+1:].encode('unicode_escape'))
+		return plain_text.decode('unicode_escape')
 
 	'''
 The below function will take three int arguements and gives hex code for the corresponding color !
@@ -194,15 +198,17 @@ if __name__=='__main__':
 
 		choice=int(input('1)Encode Message\n2)Decode Message\n3)Exit\n>>'))
 		if choice==1:
-			root=Tk()
+			'''root=Tk()
 			root.withdraw()
-			image=f.askopenfilename()
+			image=f.askopenfilename()'''
 			message=input('Enter the message or type !txt for choosing a text file :')#use the !txt flag for opening the text file other wise we type in the message !
-			key=encrypt.generate_key()
-			print(key)
-			print(encrypt.encrypt_message('Hello',key,'qwertyuiopasdfgh'))	
+			key=input('Enter password')
+			print(encrypt.encrypt_message(message,key,'qwertyuiopasdfgh'))
+			
 		elif choice==2:
-			pass
+			key=input('Enter password')
+
+			print(encrypt.decrypt_message(b'\x14\xe2*\x95\x01\xdf\x0b\x18\x0e\\>\xcb\x8e\xc4\xcfV'.decode('unicode_escape'),key))	
 		elif choice==3:			
 			print('Exiting........!')
 			break
