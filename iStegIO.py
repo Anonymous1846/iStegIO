@@ -197,6 +197,12 @@ def extract(filename):
 
 	return "Invalid Image Mode !"
 
+
+'''
+The below function is used to write the text charcters/contents from the image to a text file !
+Params:Str
+Return:None
+'''
 def write_to_file(data):
 	root=Tk()
 	root.withdraw()
@@ -209,11 +215,11 @@ def write_to_file(data):
 		print(f'Decoded data saved to {output_file_name} !')
 		
 
-#-----------------------------End of the Implementation --------------------------------#
+#----------------------------------------------------------------End of the Implementation-----------------------------------------------------------------#
 
 if __name__=='__main__':
 
-	heading = figlet_format('i S t e g I O')
+	heading = figlet_format('i S t e g I O')# for ascii art 
 	print(heading)
 	print('VERSION 1.0')
 	print(*70*('-'))
