@@ -15,7 +15,7 @@ To install the requirements we can use the command <b>pip install -r requirement
   <li>Secure.</li>
   <li>Password Protected.</li> 
 </ul>
-<img src='image.PNG'/>
+<img src=./'image.PNG'/>
 <h2>How to use it ?</h2>
 <ul>
   <li>Encoding -> To encode a text message/text file to PNG image we first need to select an image using the file dialog, then we have to enter a text message/select a 
