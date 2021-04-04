@@ -29,9 +29,9 @@ import re
 class Encryption:
 
 	'''
-	The ctr to initialize the CBC mode, and the secret IV
-	Params:None
-	Return:None
+	Encryption class encapsulates the methods for encrypting and decrypting data.
+	mode:AES_CBC(Cipher Block Chaining)
+	IV:Random 16 bytes string, which will be appended with the data !
 	'''
 	def __init__(self):
 		self.mode=AES.MODE_CBC #cipher block chain is one of the primary block cipher modes !
@@ -82,6 +82,7 @@ return: hex code for color
 '''
 def rgb_to_hex(r,g,b):
 	return '#{:02x}{:02x}{:02x}'.format(r,g,b)
+
 '''
 The below function will take a hex code and gives a tuple containing the rgb values(three len)
 params:hex code for color !
@@ -90,6 +91,7 @@ return: rgb tuple
 def hex_to_rgb(hexcode):
 	
 	return ImageColor.getcolor(hexcode,"RGB")#using the getcolor method we got the rgb tuple !
+
 '''
 We first convert the string message into hexadecimal and then into binary 
 params: string message
@@ -98,6 +100,7 @@ return: binary representation of the message
 def string_to_binary(string):	
 	binary=bin(int(binascii.hexlify(string.encode()),16)).replace('0b','')#we have to translate the binary to 01100100010010 
 	return binary
+
 '''
 The below funcition will convert the binary format into corresponding byte strem message 
 params: binary
@@ -109,6 +112,7 @@ def binary_to_string(binary):
 	#we get the byte stream of the message !
 	message= binascii.unhexlify('%x' % (int('0b'+ binary ,2))).decode()
 	return message
+
 '''	
 If end of the hex code is ether 0 or 1, then return the last part of the hexcode
 params: hexcode
@@ -118,6 +122,7 @@ def decrypt(hexcode):
 	if hexcode[-1] in ['0','1']:
 		return hexcode[-1]
 	else:return None
+
 '''
 if the hex value of the color falls within the range of 0-5, then we add the digit(binary !)
 params: hexcode and the digit !
@@ -128,6 +133,7 @@ def encrypt(hexcode,digit):
 		hexcode=hexcode[:-1]+digit
 		return hexcode
 	else:return None
+	
 '''
 We'll use all the helper function above to hide the message string within the photo
 params: the filename(namely the png photo in which we want to hide the data), message usually a text file or custom message, outputfile file(.png)
