@@ -1,0 +1,9 @@
+											***** iStegIO *****
+
+
+iStegIO is a an open source python application/script which is used to hide messages/text files within PNG images. It uses LSB(Least Significant Bit) Steagnography to hide the characters within images, which means that the blue bits of the images, are replaced by the text character bytes(Because blue is the least significant bit).
+
+1)Encoding -> When we choose the encoding option, we'll be prompted to choose a PNG image from the file explorer, after that we have to either enter a text via the keyboard or enter the
+command "!txt" to choose a text file from the file explorer. After choosing the text file and the PNG image, we will be prompted to enter a strong password that contains Upper case,lower case, special symbols and numbers.Finally we can save the Stego object at a desired location.
+
+2)Decoding -> The decoding is much simpler than encoding because, here we first have to choose the stego file,then choose a location to save the text file which is ought to store the text extracted from the image.

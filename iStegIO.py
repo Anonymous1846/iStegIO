@@ -1,45 +1,67 @@
 '''
+Author:Sharath Sunil
+
 iStegIO is a simple python script/ application which is used to hide text messages or plain text within png images.
 It usees LSB Steganography technique to hide the text within the images. Least Significant Bit Steganography method, replaces
 the blue bits, with the text bits.
+
+This project is inspired from these two projects:
+1)Teja Swaroop's Github -> https://github.com/teja156/imghide
+2)Edureka Youtube Video -> https://www.youtube.com/watch?v=xepNoHgNj0w
+
 '''
 from tkinter import filedialog as f,Tk  
-from Crypto.Cipher import AES
-from Crypto.Hash import SHA256
-from pyfiglet import figlet_format
-import binascii
-from PIL import Image,ImageColor
-from getpass import getpass
 from secrets import token_hex,choice
+from pyfiglet import figlet_format
+from PIL import Image,ImageColor
+from Crypto.Hash import SHA256
+from Crypto.Cipher import AES
+from getpass import getpass
+import binascii
 import hashlib
+import base64
 import string
+import re
+
+
+
 
 class Encryption:
+
+	'''
+	The ctr to initialize the CBC mode, and the secret IV
+	Params:None
+	Return:None
+	'''
 	def __init__(self):
 		self.mode=AES.MODE_CBC #cipher block chain is one of the primary block cipher modes !
 		self.alphabets=string.ascii_letters+string.digits
 		self.iv=''.join(str(choice(self.alphabets)) for x in range(AES.block_size)).encode()
+
+
 	'''
 	The below function will apply padding for the message as long it is not a multiple of 16
 	return: padded message which is divisible by 16(len)
 	params:message
 	'''
 	def padding(self,data):
-		while len(data) % 16!=0:
-			data=data+"~"
-		return data
+		pad=AES.block_size -len(data) %AES.block_size
+		return bytes([pad])*pad
+
 	'''
 	The below function will encrypt the plain text into a cipher text !
 	return:cipher text 
 	param:message(plain text),key obtained from the image'''
 
-	def encrypt_message(self,message,key,iv):
+	def encrypt_message(self,message,key):	
 		key=SHA256.new(key.encode()).digest()
-		
 		cipher=AES.new(key,self.mode,self.iv)
 		padded_message=self.padding(message)
-		cipher_text=cipher.encrypt(padded_message.encode('unicode_escape'))
-		return self.iv.decode()+cipher_text.decode('unicode_escape')
+		cipher_text=cipher.encrypt(message.encode()+padded_message)
+		return self.iv+cipher_text
+		
+
+
 	'''
 	The below function will decrypt the cipher text into a plain text !
 	return:plain text
@@ -47,12 +69,13 @@ class Encryption:
 
 	def decrypt_message(self,cipher_text,key):
 		key=SHA256.new(key.encode()).digest()
-		iv=cipher_text[:AES.block_size].encode()
+		iv=cipher_text[:AES.block_size]
 		cipher=AES.new(key,self.mode,iv)
-		plain_text=cipher.decrypt(cipher_text[AES.block_size+1:].encode('unicode_escape'))
-		return plain_text.decode('unicode_escape')
+		plain_text=cipher.decrypt(cipher_text[AES.block_size:])
+		return plain_text.decode()
 
-	'''
+
+'''
 The below function will take three int arguements and gives hex code for the corresponding color !
 params:r,g,b color code (int)
 return: hex code for color
@@ -175,6 +198,8 @@ def extract(filename):
 	return "Invalid Image Mode !"
 
 def write_to_file(data):
+	root=Tk()
+	root.withdraw()
 	output_file_name=f.asksaveasfilename(title='Save your secret message to ',filetypes=[('All Files', '*.*'), 
              			('Text Document', '*.txt')] )
 	if '.txt' in output_file_name:
@@ -192,26 +217,57 @@ if __name__=='__main__':
 	print(heading)
 	print('VERSION 1.0')
 	print(*70*('-'))
-	encrypt=Encryption()
+	encryptor=Encryption()
 	
 	while True:
 
-		choice=int(input('1)Encode Message\n2)Decode Message\n3)Exit\n>>'))
+		choice=int(input('1)Encode Message\n2)Decode Message\n3)Help\n4)Exit\n>>'))
 		if choice==1:
-			'''root=Tk()
-			root.withdraw()
-			image=f.askopenfilename()'''
-			message=input('Enter the message or type !txt for choosing a text file :')#use the !txt flag for opening the text file other wise we type in the message !
-			key=input('Enter password')
-			print(encrypt.encrypt_message(message,key,'qwertyuiopasdfgh'))
+			try:
+				root=Tk()#open and close the tkinter associated tkinter window !
+				root.withdraw()
+				image=f.askopenfilename(title='Choose PNG Image ',filetypes=[('All Files', '*.*'), 
+             			('Text Document', '*.txt')])
+				message=input('Enter the message or type !txt for choosing a text file :')#use the !txt flag for opening the text file other wise we type in the message !
+				if message=='!txt':
+					txt_file=f.askopenfilename(title='Choose Text File ',filetypes=[('All Files', '*.*'), 
+             			('Text Document', '*.txt')])
+					with open(txt_file,'r') as tf:
+						message=tf.read()
+				password=getpass(prompt='Please Enter A Strong Password :')
+				if re.search('^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$',password):
+					hashed_password=hashlib.sha256(password.encode()).hexdigest()
+					message_= hashed_password+encryptor.encrypt_message(message,hashed_password).hex()#password is hashed and the cipher text is stores as hex !
+					output_file_name=input('Enter the output file name : ')#name of the stego file object !
+					hide(image,message_,output_file_name)#the messge added to the image 
+					print('The Data is Hidden !')
+				else:
+					print('Password Not Strong Enough....\nPlease Try Again !')
+			except Exception as e:
+				print(f'An Error Has Occured !\n{e}')		
+			
+
 			
 		elif choice==2:
-			key=input('Enter password')
-
-			print(encrypt.decrypt_message(b'\x14\xe2*\x95\x01\xdf\x0b\x18\x0e\\>\xcb\x8e\xc4\xcfV'.decode('unicode_escape'),key))	
-		elif choice==3:			
+			try:
+				root=Tk()
+				root.withdraw()
+				stego_file=f.askopenfilename(title='Choose the Stego Object ')
+				data=extract(stego_file)
+				password=data[:64]
+				p_password=getpass(prompt='Enter the Password :')
+				if password == hashlib.sha256(p_password.encode()).hexdigest():
+					write_to_file(encryptor.decrypt_message(bytearray.fromhex(data[64:]),password).strip())
+				else:
+					print('Invalid Password !\nPlease Try Again !')
+				
+			except Exception as e:
+				print(f'An Error Has Occured !\n{e}')
+		elif choice ==3:
+			with open('Help.txt','r') as help_file:
+				print(help_file.read())
+		elif choice==4:			
 			print('Exiting........!')
 			break
-
 		else:
 			print('Invalid choice !')
