@@ -13,13 +13,13 @@ To install the requirements we can use the command <b>pip install -r requirement
 <ul>
   <li>Easy to Use.</li>
   <li>Secure.</li>
-  <li>Optional Password Protection.</li> 
+  <li>Password Protected.</li> 
 </ul>
 <img src='image.PNG'/>
 <h2>How to use it ?</h2>
 <ul>
   <li>Encoding -> To encode a text message/text file to PNG image we first need to select an image using the file dialog, then we have to enter a text message/select a 
-  text file(using the !txt to select text files). After that, we can enter a password if we want to, otherise just skip it(Press enter).Finally just enter the name of the stegofile object, which in turn will be a PNG file.</li>
+  text file(using the !txt to select text files). After that, we can enter a password.Finally just enter the name of the stegofile object, which in turn will be a PNG file.</li>
   <li>Decoding -> To decode a text message/text file from a PNG image, we just have to select the stegofile object(PNG) and have to enter a password, if it was set in the first place.Finally choose a location to save the output text file.</li>
 </ul>
 
