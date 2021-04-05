@@ -246,7 +246,7 @@ if __name__=='__main__':
 					with open(txt_file,'r') as tf:
 						message=tf.read()
 				
-				_is_strong_password=False
+				_is_strong_password=False#the user will be prompted to enter a strong password until he enters one !loop
 				while True:
 						password=getpass(prompt='Please Enter A Strong Password :')
 						if re.search('^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$',password):
@@ -284,11 +284,14 @@ if __name__=='__main__':
 							
 			except Exception as e:
 				print(f'An Error Has Occured !\n{e}')
+
 		elif choice ==3:
 			with open('Help.txt','r') as help_file:
 				print(help_file.read())
+
 		elif choice==4:			
 			print('Exiting........!')
 			break
+		
 		else:
 			print('Invalid choice !')
