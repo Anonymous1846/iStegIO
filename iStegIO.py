@@ -215,8 +215,8 @@ def write_to_file(data):
 	output_file_name=f.asksaveasfilename(title='Save your secret message to ',filetypes=[('All Files', '*.*'), 
              			('Text Document', '*.txt')] )
 	if '.txt' in output_file_name:
-		output_file_name=output_file_name.replace('.txt','')#replace the .txt from the text file if it already exists !
-	with open(output_file_name+'.txt','w') as tf:
+		output_file_name_non_txt=output_file_name.replace('.txt','')#replace the .txt from the text file if it already exists !
+	with open(output_file_name_non_txt+'.txt','w') as tf:
 		tf.write(data)
 		print(f'Decoded data saved to {output_file_name} !')
 		
@@ -238,23 +238,29 @@ if __name__=='__main__':
 			try:
 				root=Tk()#open and close the tkinter associated tkinter window !
 				root.withdraw()
-				image=f.askopenfilename(title='Choose PNG Image ',filetypes=[('All Files', '*.*'), 
-             			('Text Document', '*.txt')])
+				image=f.askopenfilename(title='Choose PNG Image ',filetypes=[('PNG Images', '*.png')])
 				message=input('Enter the message or type !txt for choosing a text file :')#use the !txt flag for opening the text file other wise we type in the message !
 				if message=='!txt':
 					txt_file=f.askopenfilename(title='Choose Text File ',filetypes=[('All Files', '*.*'), 
              			('Text Document', '*.txt')])
 					with open(txt_file,'r') as tf:
 						message=tf.read()
-				password=getpass(prompt='Please Enter A Strong Password :')
-				if re.search('^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$',password):
-					hashed_password=hashlib.sha256(password.encode()).hexdigest()
-					message_= hashed_password+encryptor.encrypt_message(message,hashed_password).hex()#password is hashed and the cipher text is stores as hex !
-					output_file_name=input('Enter the output file name : ')#name of the stego file object !
-					hide(image,message_,output_file_name)#the messge added to the image 
-					print('The Data is Hidden !')
-				else:
-					print('Password Not Strong Enough....\nPlease Try Again !')
+				
+				_is_strong_password=False
+				while True:
+						password=getpass(prompt='Please Enter A Strong Password :')
+						if re.search('^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$',password):
+							_is_strong_password=True
+							if _is_strong_password:
+								break
+						else:
+							print('Password Not Strong Enough....\nPlease Try Again !')
+				hashed_password=hashlib.sha256(password.encode()).hexdigest()
+				message_= hashed_password+encryptor.encrypt_message(message,hashed_password).hex()#password is hashed and the cipher text is stores as hex !
+				output_file_name=input('Enter the output file name : ')#name of the stego file object !
+				hide(image,message_,output_file_name)#the messge added to the image 
+				print('The Data is Hidden !')
+				
 			except Exception as e:
 				print(f'An Error Has Occured !\n{e}')		
 			
@@ -267,12 +273,15 @@ if __name__=='__main__':
 				stego_file=f.askopenfilename(title='Choose the Stego Object ')
 				data=extract(stego_file)
 				password=data[:64]
-				p_password=getpass(prompt='Enter the Password :')
-				if password == hashlib.sha256(p_password.encode()).hexdigest():
-					write_to_file(encryptor.decrypt_message(bytearray.fromhex(data[64:]),password).strip())
-				else:
-					print('Invalid Password !\nPlease Try Again !')
-				
+				correct_password=False
+				while True:
+						p_password=getpass(prompt='Enter The Password :')
+						if password == hashlib.sha256(p_password.encode()).hexdigest():
+							write_to_file(encryptor.decrypt_message(bytearray.fromhex(data[64:]),password).strip())
+							break
+						else:
+							print('Invalid Password !\nPlease Try Again !')
+							
 			except Exception as e:
 				print(f'An Error Has Occured !\n{e}')
 		elif choice ==3:
