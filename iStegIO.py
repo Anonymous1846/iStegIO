@@ -22,7 +22,7 @@ import hashlib
 import base64
 import string
 import re
-
+import os
 
 
 
@@ -166,7 +166,8 @@ def hide(filename,message,out):
 				enc_data.append(i)
 		image.putdata(enc_data)
 		image.save(out+".png","PNG")
-		print('Completed !')
+
+		print('Stego Object Saved At '+str(os.getcwd())+'\\'+out+'.png')
 	return "Invalid Format !!"
 
 '''
@@ -215,8 +216,8 @@ def write_to_file(data):
 	output_file_name=f.asksaveasfilename(title='Save your secret message to ',filetypes=[('All Files', '*.*'), 
              			('Text Document', '*.txt')] )
 	if '.txt' in output_file_name:
-		output_file_name_non_txt=output_file_name.replace('.txt','')#replace the .txt from the text file if it already exists !
-	with open(output_file_name_non_txt+'.txt','w') as tf:
+		output_file_name=output_file_name.replace('.txt','')#replace the .txt from the text file if it already exists !
+	with open(output_file_name+'.txt','w') as tf:
 		tf.write(data)
 		print(f'Decoded data saved to {output_file_name} !')
 		
@@ -257,7 +258,7 @@ if __name__=='__main__':
 							print('Password Not Strong Enough....\nPlease Try Again !')
 				hashed_password=hashlib.sha256(password.encode()).hexdigest()
 				message_= hashed_password+encryptor.encrypt_message(message,hashed_password).hex()#password is hashed and the cipher text is stores as hex !
-				output_file_name=input('Enter the output file name : ')#name of the stego file object !
+				output_file_name=input('Enter the Stego Object Name(PNG File) : ')#name of the stego file object !
 				hide(image,message_,output_file_name)#the messge added to the image 
 				print('The Data is Hidden !')
 				
