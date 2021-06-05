@@ -20,7 +20,7 @@ from getpass import getpass
 from random import choice
 import string
 
-class Encryption:
+class AESEncryption:
 
 	'''
         Encryption class encapsulates the methods for encrypting and decrypting data.
@@ -79,8 +79,13 @@ class Encryption:
 		pad_val = plain_text[-1]  
 		return plain_text[:pad_val].decode().strip() #omitting the pad value by removing the padding from the end !
 
-enc = Encryption()
-en = enc.encrypt_message('Django','Helo')
-dc = enc.decrypt_message(en,'Helo')
-print(dc)
-print(en)
+class Steganography:
+	
+	def getData(data):
+		bin_list=[]
+		for i in data:
+			bin_list.append(format(i,ord('08b')))
+		print(bin_list)
+
+steg = Steganography()
+steg.getData()
