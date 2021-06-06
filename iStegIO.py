@@ -22,6 +22,9 @@ from random import choice
 import numpy as np
 import string
 
+__version__ = 1.1
+__author__ = 'Sharath Sunil'
+
 class AESEncryption:
 
 	'''
@@ -116,6 +119,8 @@ class Steganography:
 			new_image = Image.fromarray(pix_array.astype('uint8'),image.mode) #converting to image from array !
 			new_image.save(new_path)
 			print('Stego file saved to {}'.format(new_image.filename))
+
+
 	def decode_data(self, stego_path:str ,new_path:str):
 		image = Image.open(stego_path,'r')
 		pix_array = np.array(list(image.getdata())) 				   # getting the numpy array !
@@ -133,8 +138,4 @@ class Steganography:
 			else:
 				message += chr(int(secret_bits[i],2))
 		print(self.delimitter)
-		print('The secret message is {}'.format(message[:-5])) if self.delimitter in message else print('None !')
-			
-steg = Steganography()
-#print(steg.encode_data('image.png','image1.png','Hey'))
-steg.decode_data('image1.png','Ne')
+		print('The secret message is {}'.format(message[:-5])if self.delimitter in message else 'None !') 
